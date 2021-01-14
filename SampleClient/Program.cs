@@ -33,7 +33,7 @@ namespace SampleClient
 
             var contentObject = JsonConvert.SerializeObject(new Dictionary<string, string>
             {
-                {"phone", "+198989822"}
+                {"PhoneNumber", "+198989822"}
             });
 
             var stringContent = new StringContent(contentObject, Encoding.UTF8, "application/json");
@@ -50,7 +50,7 @@ namespace SampleClient
                 ClientId = "phone_number_authentication",
                 ClientSecret = "secret",
                 Address = disco.TokenEndpoint,
-                Parameters = new Dictionary<string, string>
+                Parameters = new Parameters()
                 {
                     {"phone_number", "+198989822"},
                     {"verification_token", verifyTokenResponse.VerifyToken}

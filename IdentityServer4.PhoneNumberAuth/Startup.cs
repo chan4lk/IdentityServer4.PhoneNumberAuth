@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 
 namespace IdentityServer4.PhoneNumberAuth
 {
@@ -25,13 +27,13 @@ namespace IdentityServer4.PhoneNumberAuth
         {
             var connectionString = _configuration["ConnectionString"];
             services.AddTransient<ISmsService, SmsService>();
-            services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(connectionString); });
+            services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlServer(connectionString); });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddMvc();
+            services.AddControllers();
             services.AddIdentityServer(options =>
                 {
                     options.Events.RaiseErrorEvents = true;
@@ -42,10 +44,11 @@ namespace IdentityServer4.PhoneNumberAuth
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryClients(Config.GetClients())
-                .AddAspNetIdentity<ApplicationUser>();
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddProfileService<IdentityProfileService>();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -53,8 +56,12 @@ namespace IdentityServer4.PhoneNumberAuth
             }
 
             app.UseIdentityServer();
-            app.UseMvc();
-            app.UseMvcWithDefaultRoute();
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
